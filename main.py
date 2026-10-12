@@ -6,12 +6,12 @@ import math
 
 # Setup
 pygame.init()
-normalMusic = Path("placeholder-normal.mp3").parent / "assets" / "music" / "placeholder-normal.mp3"
+normalMusic = Path("placeholder-normal.ogg").parent / "assets" / "music" / "placeholder-normal.ogg"
 try:
     iconImage = pygame.image.load(str(Path("icon.ico")))
     pygame.display.set_icon(iconImage)
 except FileNotFoundError:
-    print("Icon file not found")
+    print("Falling back to default icon")
 screen = pygame.display.set_mode((640, 480))
 screenwidth = screen.get_width()
 screenheight = screen.get_height()
@@ -43,7 +43,7 @@ frames = 0
 downtime = 0
 frameTarget = enemyTrackingDuration
 prevTabKey = False
-userdataPath = Path(__file__).with_name("userdata.json")
+userdataPath = Path(__file__).parent / "userdata.json"
 
 # Images
 backgroundNormalImgPath = Path("ocean1.webp").parent / "assets" / "images" / "ocean1.webp"
@@ -252,6 +252,7 @@ while running:
             print(f"New personal best: {personalBest}")
         pygame.mixer.music.stop()
         print("Game Over!")
+
 pygame.quit()
 # Write personal best even if game closes
 if gametime > personalBest:
