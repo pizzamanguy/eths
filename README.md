@@ -22,7 +22,7 @@ This is a port made by me (the creator of the scratch version)
 3. Extract the .zip file
 
 ## 2. Install dependencies
-**(If you already have python and pygame-ce installed, run `eths.py`)**
+**(If you already have python and pygame-ce installed, open `main.py`)**
 1. Install [python](https://www.python.org/downloads/)
 2. Once installed, open a terminal/command prompt window and run the command: ``pip install pygame-ce``
-3. After pygame-ce is installed, you can now run `eths.py` where the files were extracted
+3. After pygame-ce is installed, you can now open `main.py` where the files were extracted
