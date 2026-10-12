@@ -3,7 +3,7 @@ This is based off of [this game](https://scratch.mit.edu/projects/653834126/) ma
 
 This is a port made by me (the creator of the scratch version)
 
-**Some of this code was AI-Assisted, since this is my first every python project**
+**Some of this code was AI-Assisted, since this is my first ever python project**
 
 # Install guide
 **This game is still in Pre-Alpha, so don't expect releases soon. This guide shows you how to run the python file (the entire game currently)**
