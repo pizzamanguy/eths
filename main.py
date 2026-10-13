@@ -3,15 +3,20 @@ import pygame
 from pathlib import Path
 import json
 import math
+import sys
+
+# File Loading
+fileDir = Path(__file__).resolve().parent
+sys.path.append(fileDir)
+normalMusic = Path(__file__).parent / "assets" / "music" / "placeholder-normal.ogg"
+iconImage = pygame.image.load(Path(__file__).parent / "icon.ico")
+backgroundNormalImgPath = Path(__file__).resolve().parent / "assets" / "images" / "ocean1.webp"
+carlNormalImgPath = Path(__file__).resolve().parent / "assets" / "images" / "carl" / "carl normal.webp"
+userdataPath = Path(__file__).resolve().parent / "userdata.json"
 
 # Setup
 pygame.init()
-normalMusic = Path("placeholder-normal.ogg").parent / "assets" / "music" / "placeholder-normal.ogg"
-try:
-    iconImage = pygame.image.load(str(Path("icon.ico")))
-    pygame.display.set_icon(iconImage)
-except FileNotFoundError:
-    print("Falling back to default icon")
+pygame.display.set_icon(iconImage)
 screen = pygame.display.set_mode((640, 480))
 screenwidth = screen.get_width()
 screenheight = screen.get_height()
@@ -26,9 +31,11 @@ pygame.mixer.music.play(-1)
 isAlive = True
 debugMode = False
 hitboxSize = 50
+playerSize = 50
 playerX = 320  
 playerY = 240
-playerSpeed = 6
+playerMoveSpeed = 5
+playerTurnSpeed = 4
 playerAngle = 0
 enemyX = 100
 enemyY = 100
@@ -43,15 +50,12 @@ frames = 0
 downtime = 0
 frameTarget = enemyTrackingDuration
 prevTabKey = False
-userdataPath = Path(__file__).parent / "userdata.json"
 
 # Images
-backgroundNormalImgPath = Path("ocean1.webp").parent / "assets" / "images" / "ocean1.webp"
 backgroundNormalImg = pygame.image.load(str(backgroundNormalImgPath)).convert_alpha()
 backgroundNormalImg = pygame.transform.smoothscale(backgroundNormalImg, (screenwidth, screenheight))
-carlNormalImgPath = Path("carl normal.webp").parent / "assets" / "images" / "carl" / "carl normal.webp"
 carlNormalImg = pygame.image.load(str(carlNormalImgPath)).convert_alpha()
-carlNormalImg = pygame.transform.smoothscale(carlNormalImg, (hitboxSize, hitboxSize))
+carlNormalImg = pygame.transform.smoothscale(carlNormalImg, (playerSize, playerSize))
 
 # User Data Shenanigans
 try:
@@ -81,6 +85,7 @@ def nextMove(nextBrain):
     elif nextBrain == "cooldown":
         frameTarget = frames + enemyCooldownDuration
         enemyBrain = "cooldown"
+
 def enemyMovement():
     global frames, frameTarget, enemyBrain, enemyTargetX, enemyTargetY, enemyX, enemyY
     # Tracking
@@ -139,19 +144,16 @@ while running:
     if isAlive:
         # Player Movement
         keys = pygame.key.get_pressed()
-        moveX = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
-        moveY = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
-        if moveX != 0 or moveY != 0:
-            playerAngle = -math.degrees(math.atan2(moveX, -moveY))
-            playerAngle += 90
         if keys[pygame.K_LEFT]:
-            playerX -= playerSpeed
+            playerAngle += playerTurnSpeed
         if keys[pygame.K_RIGHT]:
-            playerX += playerSpeed
+            playerAngle -= playerTurnSpeed
         if keys[pygame.K_UP]:
-            playerY -= playerSpeed
+            playerX += playerMoveSpeed * math.cos(math.radians(playerAngle))
+            playerY -= playerMoveSpeed * math.sin(math.radians(playerAngle))
         if keys[pygame.K_DOWN]:
-            playerY += playerSpeed
+            playerX -= playerMoveSpeed * math.cos(math.radians(playerAngle))
+            playerY += playerMoveSpeed * math.sin(math.radians(playerAngle))
         if keys[pygame.K_TAB]:
             if not prevTabKey:
                 debugMode = not debugMode
@@ -164,12 +166,12 @@ while running:
         # Player
         if playerX < 0:
             playerX = 0
-        if playerX > 640 - hitboxSize:
-            playerX = 640 - hitboxSize
+        if playerX > 640 - playerSize:
+            playerX = 640 - playerSize
         if playerY < 0:
             playerY = 0
-        if playerY > 480 - hitboxSize:
-            playerY = 480 - hitboxSize
+        if playerY > 480 - playerSize:
+            playerY = 480 - playerSize
         # Enemy
         if enemyX < 0:
             enemyX = 0
@@ -181,7 +183,7 @@ while running:
             enemyY = 480 - hitboxSize
 
         # Timer calculation
-        gametime = ((pygame.time.get_ticks() - downtime) // 100) / 10
+        gametime = (pygame.time.get_ticks() - downtime) // 100 / 10
 
         # Frame Drawing
         screen.fill((0, 0, 0))
@@ -201,9 +203,9 @@ while running:
         enemy = pygame.Rect(enemyX, enemyY, hitboxSize, hitboxSize)  # Collision rect for enemy
 
         # Player Drawing
-        rotatedCarlImg = pygame.transform.rotate(carlNormalImg, playerAngle)
-        rotatedCarlRect = rotatedCarlImg.get_rect(center=player.center)
-        screen.blit(rotatedCarlImg, rotatedCarlRect)
+        playerAppearance = pygame.transform.rotate(carlNormalImg, playerAngle)
+        playerAppearanceRect = playerAppearance.get_rect(center=player.center)
+        screen.blit(playerAppearance, playerAppearanceRect)
         
         # Time
         if gametime > personalBest:
@@ -232,10 +234,10 @@ while running:
         timeSurvivedText = font.render(f"Time Survived: {gametime}", True, (255, 255, 255))
         personalBestText = font.render(f"Personal Best: {personalBest}", True, (255, 255, 255))
         restartText = font.render("Press R to Restart", True, (255, 255, 255))
-        screen.blit(gameOverText, (240, 180))
+        screen.blit(gameOverText, (screenwidth / 2 - gameOverText.get_width() / 2, 180))
         screen.blit(timeSurvivedText, (screenwidth / 2 - timeSurvivedText.get_width() / 2, 210))
         screen.blit(personalBestText, (screenwidth / 2 - personalBestText.get_width() / 2, 240))
-        screen.blit(restartText, (200, 270))
+        screen.blit(restartText, (screenwidth / 2 - restartText.get_width() / 2, 270))
     pygame.display.flip()
     clock.tick(60)
     frames += 1
