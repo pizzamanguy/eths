@@ -1,5 +1,5 @@
 # Escape the Hungry Shark (pygame port)
-This is based off of [this game](https://scratch.mit.edu/projects/653834126/) made in Scratch.
+This is based off of [this game](https://scratch.mit.edu/projects/1390328953/) made in Scratch.
 
 This is a port made by me (the creator of the scratch version)
 
